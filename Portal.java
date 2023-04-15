@@ -3,12 +3,16 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public abstract class Portal {
-    protected String direction;
-    protected double openProb;
-    protected double exitProb;
-    protected double policeProb;
+    protected final String direction;
+    protected int openProb;
+    protected int exitProb;
+    protected int policeProb;
+    static Portal.NorthPortal nPortal = null;
+    static Portal.SouthPortal sPortal = null;
+    static Portal.EastPortal ePortal = null;
+    static Portal.WestPortal wPortal = null;
 
-    public Portal(String direction, double openProb, double exitProb, double policeProb) {
+    public Portal(String direction, int openProb, int exitProb, int policeProb) {
         this.direction = direction;
         this.openProb = openProb;
         this.exitProb = exitProb;
@@ -16,46 +20,46 @@ public abstract class Portal {
     }
 
     public static class NorthPortal extends Portal {
-        public NorthPortal(String direction, double openProb, double exitProb, double policeProb) {
+        public NorthPortal(String direction, int openProb, int exitProb, int policeProb) {
             super("North", openProb, exitProb, policeProb);
         }
 
         @Override
         public void usePortal() {
-            System.out.println("North");
-        }
-    }
-
-    public static class SouthPortal extends Portal {
-        public SouthPortal(String direction, double openProb, double exitProb, double policeProb) {
-            super("South", openProb, exitProb, policeProb);
-        }
-
-        @Override
-        public void usePortal() {
-            System.out.println("South");
+            calculateNewProb(exitProb);
         }
     }
 
     public static class EastPortal extends Portal {
-        public EastPortal(String direction, double openProb, double exitProb, double policeProb) {
+        public EastPortal(String direction, int openProb, int exitProb, int policeProb) {
             super("East", openProb, exitProb, policeProb);
         }
 
         @Override
         public void usePortal() {
-            System.out.println("East");
+            calculateNewProb(exitProb);
+        }
+    }
+
+    public static class SouthPortal extends Portal {
+        public SouthPortal(String direction, int openProb, int exitProb, int policeProb) {
+            super("South", openProb, exitProb, policeProb);
+        }
+
+        @Override
+        public void usePortal() {
+            calculateNewProb(exitProb);
         }
     }
 
     public static class WestPortal extends Portal {
-        public WestPortal(String direction, double openProb, double exitProb, double policeProb) {
+        public WestPortal(String direction, int openProb, int exitProb, int policeProb) {
             super("West", openProb, exitProb, policeProb);
         }
 
         @Override
         public void usePortal() {
-            System.out.println("West");
+            calculateNewProb(exitProb);
         }
     }
 
@@ -63,16 +67,28 @@ public abstract class Portal {
         return this.direction;
     }
 
-    public double getPortalOpenProbability() {
+    public int getPortalOpenProbability() {
         return this.openProb;
     }
 
-    public double getExitProbability() {
+    public int getExitProbability() {
         return this.exitProb;
     }
 
-    public double getMagicPoliceEncounterProbability() {
+    public int getPoliceProbability() {
         return this.policeProb;
+    }
+
+    public void setPortalOpenProbability(int openProb) {
+        this.openProb = openProb;
+    }
+
+    public void setExitProbability(int exitProb) {
+        this.exitProb = exitProb;
+    }
+
+    public void setPoliceProbability(int policeProb) {
+        this.policeProb = policeProb;
     }
 
     public static void readExits(String fileName) {
@@ -84,21 +100,21 @@ public abstract class Portal {
                 line = textReader.nextLine();
                 String[] tokens = line.split(",");
                 String direction = tokens[0];
-                Double openProb = Double.parseDouble(tokens[1]);
-                Double exitProb = Double.parseDouble(tokens[2]);
-                Double policeProb = Double.parseDouble(tokens[3]);
+                int openProb = Integer.parseInt(tokens[1]);
+                int exitProb = Integer.parseInt(tokens[2]);
+                int policeProb = Integer.parseInt(tokens[3]);
                 switch (direction) {
                     case "North":
-                        Portal.NorthPortal nPortal = new Portal.NorthPortal(direction, openProb, exitProb, policeProb);
-                        break;
-                    case "South":
-                        Portal.SouthPortal sPortal = new Portal.SouthPortal(direction, openProb, exitProb, policeProb);
+                        nPortal = new Portal.NorthPortal(direction, openProb, exitProb, policeProb);
                         break;
                     case "East":
-                        Portal.EastPortal ePortal = new Portal.EastPortal(direction, openProb, exitProb, policeProb);
+                        ePortal = new Portal.EastPortal(direction, openProb, exitProb, policeProb);
+                        break;
+                    case "South":
+                        sPortal = new Portal.SouthPortal(direction, openProb, exitProb, policeProb);
                         break;
                     case "West":
-                        Portal.WestPortal wPortal = new Portal.WestPortal(direction, openProb, exitProb, policeProb);
+                        wPortal = new Portal.WestPortal(direction, openProb, exitProb, policeProb);
                         break;
                     default:
                         System.out.println("No such direction");
@@ -109,6 +125,36 @@ public abstract class Portal {
             System.out.println("File not found");
             e.printStackTrace();
         }
+    }
+
+    public void calculateNewProb(int exitProb) {
+        int exitRandomNumber;
+        int policeRandomNumber;
+        do {
+            exitRandomNumber = (int) (Math.random() * 11) - 5;
+        } while (exitRandomNumber == 0);
+        int newExitProb = exitRandomNumber + exitProb;
+        if (newExitProb < 0) {
+            setExitProbability(0);
+        } else if (newExitProb > 100) {
+            setExitProbability(100);
+        } else
+            setExitProbability(newExitProb);
+            
+        do {
+            policeRandomNumber = (int) (Math.random() * 11) - 5;
+        } while (policeRandomNumber == 0);
+        int newPoliceProb = policeRandomNumber + policeProb;
+        if (newPoliceProb < 0) {
+            setPoliceProbability(0);
+        } else if (newPoliceProb > 100) {
+            setPoliceProbability(100);
+        } else
+            setPoliceProbability(newPoliceProb);
+        System.out.println("North | " + nPortal.getExitProbability() + " | " + nPortal.getPoliceProbability());
+        System.out.println("East  | " + ePortal.getExitProbability() + " | " + ePortal.getPoliceProbability());
+        System.out.println("South | " + sPortal.getExitProbability() + " | " + sPortal.getPoliceProbability());
+        System.out.println("West  | " + wPortal.getExitProbability() + " | " + wPortal.getPoliceProbability());
     }
 
     public abstract void usePortal();
