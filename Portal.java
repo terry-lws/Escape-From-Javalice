@@ -94,13 +94,6 @@ public abstract class Portal {
 
     // -------------------------Gameplay methods below-----------------------------
 
-    public static int randomizeInteger() {
-        int randomNum = 0;
-        Random rand = new Random();
-        randomNum = rand.nextInt();
-        return randomNum;
-    }
-
     public static void readExits(String fileName) {
         try {
             String line = null;
@@ -141,7 +134,7 @@ public abstract class Portal {
         int[] portalOpenProb = { nPortal.openProb, ePortal.openProb, sPortal.openProb, wPortal.openProb };
         int[] chanceArray = new int[4];
         for (int i = 0; i < chanceArray.length; i++) {
-            chanceArray[i] = randomizeInteger();
+            chanceArray[i] = GenericMethods.randomizeOneToHundred();
         }
         nPortal.portalIsOpen = (chanceArray[0] <= portalOpenProb[0]) ? true : false;
         ePortal.portalIsOpen = (chanceArray[1] <= portalOpenProb[1]) ? true : false;
@@ -152,32 +145,28 @@ public abstract class Portal {
     public static boolean randomizePolicePresence(String choice) {
         switch (choice) {
             case "N":
-                if (randomizeInteger() <= nPortal.policeProb) {
+                if (GenericMethods.randomizeOneToHundred() <= nPortal.policeProb) {
                     System.out.println("Police is here!");
                     return true;
                 }
             case "E":
-                if (randomizeInteger() <= ePortal.policeProb) {
+                if (GenericMethods.randomizeOneToHundred() <= ePortal.policeProb) {
                     System.out.println("Police is here!");
                     return true;
                 }
             case "S":
-                if (randomizeInteger() <= sPortal.policeProb) {
+                if (GenericMethods.randomizeOneToHundred() <= sPortal.policeProb) {
                     System.out.println("Police is here!");
                     return true;
                 }
             case "W":
-                if (randomizeInteger() <= wPortal.policeProb) {
+                if (GenericMethods.randomizeOneToHundred() <= wPortal.policeProb) {
                     System.out.println("Police is here!");
                     return true;
                 }
             default:
                 return false;
         }
-    }
-
-    public static void randomizeMagicBox() {
-        randomizeInteger();
     }
 
     public void calculateNewProb(int exitProb) {
@@ -203,11 +192,6 @@ public abstract class Portal {
             setPoliceProbability(100);
         } else
             setPoliceProbability(newPoliceProb);
-        System.out.println("(Direction) - (Exit Probability), (Police Encounterment Probability)");
-        System.out.println("North - " + nPortal.getExitProbability() + "%, " + nPortal.getPoliceProbability() + "%");
-        System.out.println("East - " + ePortal.getExitProbability() + "%, " + ePortal.getPoliceProbability() + "%");
-        System.out.println("South - " + sPortal.getExitProbability() + "%, " + sPortal.getPoliceProbability() + "%");
-        System.out.println("West - " + wPortal.getExitProbability() + "%, " + wPortal.getPoliceProbability() + "%");
     }
 
     public abstract void usePortal();
