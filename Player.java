@@ -3,13 +3,13 @@ import java.util.Scanner;
 public class Player{
 
     private String playerName;
-    private int coins = 10;
-    //private Room room;
+    private int coins;
+    private int jumpbackCount;
 
-    public Player(String playerName) {
+    public Player(String playerName, int coins, int jumpbackCount) {
         this.playerName = playerName;
         this.coins = coins;
-        //this.room = null;
+        this.jumpbackCount = jumpbackCount;
     }
 
     public String getPlayerName() {
@@ -38,5 +38,9 @@ public class Player{
             }
         }
         return playerName;
+    }
+
+    public static void updateCoins() {
+        
     }
 }
