@@ -10,6 +10,7 @@ public abstract class Items {
     static Items.MagicPoliceAlarm alarm = new Items.MagicPoliceAlarm("Magic Police Alarm", 25, 3);
     static Items.InvisibilityCloak cloak = new Items.InvisibilityCloak("Invisibility Cloak", 15, 1);
     static Items.Coal coal = new Items.Coal("Coal", 30);
+    static Player player = new Player(Game.playerName, 10, 3, 3);
 
     public Items(String name, int chanceOfOccurring) {
         this.name = name;
@@ -28,11 +29,26 @@ public abstract class Items {
         public int getValue() {
             return this.value;
         }
+
+        public static void activateCoinsItem() {
+            Random rand = new Random();
+            int randomNum = rand.nextInt(26) + 10;
+            System.out.println("You get " + randomNum + " coins");
+            player.setCoins(randomNum + player.getCoins());
+            System.out.println("You now have " + player.getCoins() + " coins");
+        }
     }
 
     public static class MagicPoliceAlarm extends Items {
         public MagicPoliceAlarm(String name, int chanceOfOccurring, int raisedPercentage) {
             super(name, chanceOfOccurring);
+        }
+
+        public static void activateAlarmItem() {
+            Portal.nPortal.setPoliceProbability(Portal.nPortal.getPoliceProbability() + 3);
+            Portal.ePortal.setPoliceProbability(Portal.ePortal.getPoliceProbability() + 3);
+            Portal.sPortal.setPoliceProbability(Portal.sPortal.getPoliceProbability() + 3);
+            Portal.wPortal.setPoliceProbability(Portal.wPortal.getPoliceProbability() + 3);
         }
     }
 
@@ -92,6 +108,8 @@ public abstract class Items {
             System.out.println("Magic box NOT found");
     }
 
+    // -------------------------Magic box methods below-----------------------------
+
     public static void randomizeMagicBoxItems() {
         int coinsChance = coins.getChanceOfOccurring();
         int alarmChance = alarm.getChanceOfOccurring();
@@ -102,11 +120,11 @@ public abstract class Items {
         if (randomNum <= coinsChance) {
             // coins, 30%
             System.out.println(coins.getName());
-            activateCoinsItem();
+            Coins.activateCoinsItem();
         } else if (randomNum <= coinsChance + alarmChance) {
             // alarm, 25%
             System.out.println(alarm.getName());
-            activateAlarmItem();
+            MagicPoliceAlarm.activateAlarmItem();
         } else if (randomNum <= coinsChance + alarmChance + cloakChance) {
             // cloak, 15%
             System.out.println(cloak.getName());
@@ -116,19 +134,11 @@ public abstract class Items {
         }
     }
 
-    public static void activateCoinsItem() {
-        // Player player = new Player(Game.playerName, Game.coins);
-        // Random rand = new Random();
-        // int randomNum = rand.nextInt(26) + 10;
-        // System.out.println(randomNum);
-        // System.out.println(randomNum + player.coins);
-        // player.setCoins(randomNum + player.coins);
-    }
-
-    public static void activateAlarmItem() {
-        Portal.nPortal.setPoliceProbability(Portal.nPortal.getPoliceProbability() + 3);
-        Portal.ePortal.setPoliceProbability(Portal.ePortal.getPoliceProbability() + 3);
-        Portal.sPortal.setPoliceProbability(Portal.sPortal.getPoliceProbability() + 3);
-        Portal.wPortal.setPoliceProbability(Portal.wPortal.getPoliceProbability() + 3);
+    public static double getBribeMultiplier() {
+        Random rand = new Random();
+        int randomNum = rand.nextInt(11) + 5;
+        double multiplier = (double) randomNum;
+        multiplier = multiplier/10;
+        return multiplier;
     }
 }
