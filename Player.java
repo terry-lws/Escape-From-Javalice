@@ -1,23 +1,25 @@
 import java.util.Scanner;
 
-public class Player{
+public class Player {
 
-    private String playerName;
-    private int coins;
-    private int jumpbackCount;
+    public String playerName;
+    public int coins;
+    public int jumpbackCount;
+    public int cloakCount;
 
-    public Player(String playerName, int coins, int jumpbackCount) {
+    public Player(String playerName, int coins, int jumpbackCount, int cloakCount) {
         this.playerName = playerName;
         this.coins = coins;
         this.jumpbackCount = jumpbackCount;
+        this.cloakCount = cloakCount;
     }
 
     public String getPlayerName() {
-        return playerName;
+        return this.playerName;
     }
 
     public int getCoins() {
-        return coins;
+        return this.coins;
     }
 
     public void setCoins(int coins) {
@@ -38,9 +40,5 @@ public class Player{
             }
         }
         return playerName;
-    }
-
-    public static void updateCoins() {
-        
     }
 }
