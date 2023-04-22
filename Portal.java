@@ -1,7 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
-import java.util.Random;
 
 public abstract class Portal {
     protected final String direction;
@@ -30,7 +29,7 @@ public abstract class Portal {
 
         @Override
         public void usePortal() {
-            calculateNewProb(exitProb);
+            calculateNewProb();
         }
     }
 
@@ -41,7 +40,7 @@ public abstract class Portal {
 
         @Override
         public void usePortal() {
-            calculateNewProb(exitProb);
+            calculateNewProb();
         }
     }
 
@@ -53,7 +52,7 @@ public abstract class Portal {
 
         @Override
         public void usePortal() {
-            calculateNewProb(exitProb);
+            calculateNewProb();
         }
     }
 
@@ -64,7 +63,7 @@ public abstract class Portal {
 
         @Override
         public void usePortal() {
-            calculateNewProb(exitProb);
+            calculateNewProb();
         }
     }
 
@@ -145,22 +144,22 @@ public abstract class Portal {
     public static boolean randomizePolicePresence(String choice) {
         switch (choice) {
             case "N":
-                if (GenericMethods.randomizeOneToHundred() <= nPortal.policeProb) {
+                if (GenericMethods.randomizeOneToHundred() <= nPortal.exitProb) {
                     System.out.println("Police is here!");
                     return true;
                 }
             case "E":
-                if (GenericMethods.randomizeOneToHundred() <= ePortal.policeProb) {
+                if (GenericMethods.randomizeOneToHundred() <= ePortal.exitProb) {
                     System.out.println("Police is here!");
                     return true;
                 }
             case "S":
-                if (GenericMethods.randomizeOneToHundred() <= sPortal.policeProb) {
+                if (GenericMethods.randomizeOneToHundred() <= sPortal.exitProb) {
                     System.out.println("Police is here!");
                     return true;
                 }
             case "W":
-                if (GenericMethods.randomizeOneToHundred() <= wPortal.policeProb) {
+                if (GenericMethods.randomizeOneToHundred() <= wPortal.exitProb) {
                     System.out.println("Police is here!");
                     return true;
                 }
@@ -169,7 +168,34 @@ public abstract class Portal {
         }
     }
 
-    public void calculateNewProb(int exitProb) {
+    public static boolean randomizeExits(String choice) {
+        switch (choice) {
+            case "N":
+                if (GenericMethods.randomizeOneToHundred() <= nPortal.policeProb) {
+                    System.out.println("You found the exit! The game has ended");
+                    return true;
+                }
+            case "E":
+                if (GenericMethods.randomizeOneToHundred() <= ePortal.policeProb) {
+                    System.out.println("You found the exit! The game has ended");
+                    return true;
+                }
+            case "S":
+                if (GenericMethods.randomizeOneToHundred() <= sPortal.policeProb) {
+                    System.out.println("You found the exit! The game has ended");
+                    return true;
+                }
+            case "W":
+                if (GenericMethods.randomizeOneToHundred() <= wPortal.policeProb) {
+                    System.out.println("You found the exit! The game has ended");
+                    return true;
+                }
+            default:
+                return false;
+        }
+    }
+
+    public void calculateNewProb() {
         int exitRandomNumber, policeRandomNumber;
         do {
             exitRandomNumber = (int) (Math.random() * 11) - 5;
