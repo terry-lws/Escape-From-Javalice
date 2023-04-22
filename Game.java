@@ -2,10 +2,14 @@ import java.util.Scanner;
 
 public class Game {
 
+    public static int price;
     public static boolean newTurn = true;
-    public static int coins;
     public static String playerName;
-    static Player player = new Player(playerName, 10, 3, 0);
+    static Player player = new Player(playerName, 10, 3, 3, 0);
+    static Items.Coins coins = new Items.Coins("Coins", 30, 10);
+    static Items.MagicPoliceAlarm alarm = new Items.MagicPoliceAlarm("Magic Police Alarm", 25, 3);
+    static Items.InvisibilityCloak cloak = new Items.InvisibilityCloak("Invisibility Cloak", 15);
+    static Items.Coal coal = new Items.Coal("Coal", 30);
 
     public static void main(String[] args) {
 
@@ -13,13 +17,10 @@ public class Game {
 
         Portal.readExits("exits.txt");
         playerName = Player.createName();
-        coins = player.getCoins();
-        player.setCoins(coins);
-        System.out.println("Name: " + playerName + "\nCoins: " + coins);
+        player.setplayerName(playerName);
         String choice;
         Scanner scanner = new Scanner(System.in);
         while (true) {
-            coins = Items.player.getCoins();
             // randomize which portal will be opened when entering a new turn
             if (newTurn) {
                 Portal.randomizeOpenPortal();
@@ -29,7 +30,10 @@ public class Game {
             }
             // set newTurn to false to prevent portal randomization on the same turn
             newTurn = false;
-            System.out.println("Coins: " + coins);
+            System.out.println("Coins: " + player.getCoins());
+            System.out.println("Jumpbacks: " + player.jumpbackCount);
+            System.out.println("Inventory space: " + player.inventorySpace);
+            System.out.println("Cloak: " + player.cloakCount);
             // display closed and available portals and prompt user to select a portal
             while (newTurn == false) {
                 System.out.println("Select a portal (enter one character only)");
@@ -49,61 +53,119 @@ public class Game {
                     System.out.println("W - West");
                 else
                     System.out.println("W - West (Closed)");
-                choice = scanner.nextLine().trim().toUpperCase();
-                // print statements based on user's selection
-                switch (choice) {
-                    case ("N"):
-                        if (Portal.nPortal.portalIsOpen) {
-                            System.out.println("Your selection: " + choice + " portal");
-                            Portal.nPortal.usePortal();
-                            policeEncounter = Portal.randomizePolicePresence(choice);
-                            if (policeEncounter)
-                                encounterPolice();
-                            newTurn = true;
-                        } else
-                            System.out.println("This portal is closed!");
-                        break;
-                    case ("E"):
-                        if (Portal.ePortal.portalIsOpen) {
-                            System.out.println("Your selection: " + choice + " portal");
-                            Portal.ePortal.usePortal();
-                            policeEncounter = Portal.randomizePolicePresence(choice);
-                            if (policeEncounter)
-                                encounterPolice();
-                            newTurn = true;
-                        } else
-                            System.out.println("This portal is closed!");
-                        break;
-                    case ("S"):
-                        if (Portal.sPortal.portalIsOpen) {
-                            System.out.println("Your selection: " + choice + " portal");
-                            Portal.sPortal.usePortal();
-                            policeEncounter = Portal.randomizePolicePresence(choice);
-                            if (policeEncounter)
-                                encounterPolice();
-                            newTurn = true;
-                        } else
-                            System.out.println("This portal is closed!");
-                        break;
-                    case ("W"):
-                        if (Portal.wPortal.portalIsOpen) {
-                            System.out.println("Your selection: " + choice + " portal");
-                            Portal.wPortal.usePortal();
-                            policeEncounter = Portal.randomizePolicePresence(choice);
-                            if (policeEncounter)
-                                encounterPolice();
-                            newTurn = true;
-                        } else
-                            System.out.println("This portal is closed!");
-                        break;
-                    default:
-                        System.out.println("No such portal, please choose again");
+                if (!Portal.nPortal.portalIsOpen && !Portal.ePortal.portalIsOpen && !Portal.sPortal.portalIsOpen
+                        && !Portal.wPortal.portalIsOpen && player.jumpbackCount > 0) {
+                    System.out.println("\nAll portals are close, a jump back is used automatically");
+                    player.jumpbackCount--;
+                    System.out.println("You have " + player.jumpbackCount + " jump backs left\n");
+                    GenericMethods.sleep(2000);
+                    Portal.randomizeOpenPortal();
+                } else if (!Portal.nPortal.portalIsOpen && !Portal.ePortal.portalIsOpen && !Portal.sPortal.portalIsOpen
+                        && !Portal.wPortal.portalIsOpen && player.jumpbackCount <= 0) {
+                    System.out.println("All portals are close and you don't have any jump backs, the game has ended");
+                    GenericMethods.endGame(false);
+                } else {
+                    choice = scanner.nextLine().trim().toUpperCase();
+                    // print statements based on user's selection
+                    switch (choice) {
+                        case ("N"):
+                            if (Portal.nPortal.portalIsOpen) {
+                                System.out.println("Your selection: " + choice + " portal");
+                                Portal.nPortal.usePortal();
+                                policeEncounter = Portal.randomizePolicePresence(choice);
+                                if (Portal.randomizeExits(choice)) {
+                                    GenericMethods.endGame(true);
+                                }
+                                if (policeEncounter)
+                                    encounterPolice();
+                                newTurn = true;
+                            } else
+                                System.out.println("This portal is closed!");
+                            break;
+                        case ("E"):
+                            if (Portal.ePortal.portalIsOpen) {
+                                System.out.println("Your selection: " + choice + " portal");
+                                Portal.ePortal.usePortal();
+                                policeEncounter = Portal.randomizePolicePresence(choice);
+                                if (Portal.randomizeExits(choice)) {
+                                    GenericMethods.endGame(true);
+                                }
+                                if (policeEncounter)
+                                    encounterPolice();
+                                newTurn = true;
+                            } else
+                                System.out.println("This portal is closed!");
+                            break;
+                        case ("S"):
+                            if (Portal.sPortal.portalIsOpen) {
+                                System.out.println("Your selection: " + choice + " portal");
+                                Portal.sPortal.usePortal();
+                                policeEncounter = Portal.randomizePolicePresence(choice);
+                                if (Portal.randomizeExits(choice)) {
+                                    GenericMethods.endGame(true);
+                                }
+                                if (policeEncounter)
+                                    encounterPolice();
+                                newTurn = true;
+                            } else
+                                System.out.println("This portal is closed!");
+                            break;
+                        case ("W"):
+                            if (Portal.wPortal.portalIsOpen) {
+                                System.out.println("Your selection: " + choice + " portal");
+                                Portal.wPortal.usePortal();
+                                policeEncounter = Portal.randomizePolicePresence(choice);
+                                if (Portal.randomizeExits(choice)) {
+                                    GenericMethods.endGame(true);
+                                }
+                                if (policeEncounter)
+                                    encounterPolice();
+                                newTurn = true;
+                            } else
+                                System.out.println("This portal is closed!");
+                            break;
+                        default:
+                            System.out.println("No such portal, please choose again");
+                    }
                 }
             }
+
             // randomize magic box
-            Items.randomizeMagicBox();
-            // print portal statement
-            System.out.println("Direction - Exit Probability (%), Police Encounterment Probability (%)");
+            if (GenericMethods.randomizeOneToHundred() <= 50) {
+                if (Items.foundMagicBox()) {
+                    int coinsChance = coins.getprobability();
+                    int alarmChance = alarm.getprobability();
+                    int cloakChance = cloak.getprobability();
+                    int randomNum = GenericMethods.randomizeOneToHundred();
+                    System.out.println("You recieved...");
+                    GenericMethods.sleep(1000);
+                    if (randomNum <= coinsChance) {
+                        // coins, 30%
+                        System.out.println(coins.getName());
+                        Items.Coins.activateCoinsItem(player);
+                    } else if (randomNum <= coinsChance + alarmChance) {
+                        // alarm, 25%
+                        System.out.println(alarm.getName());
+                        Items.MagicPoliceAlarm.activateAlarmItem();
+                        System.out.println("+3% magic police encounterment probability for all portals");
+                    } else if (randomNum <= coinsChance + alarmChance + cloakChance) {
+                        // cloak, 15%
+                        System.out.println(cloak.getName());
+                        if (player.inventorySpace > 0 && player.cloakCount <= 3) {
+                            player.cloakCount++;
+                            player.inventorySpace--;
+                        }
+                    } else {
+                        // coal, 30%
+                        System.out.println(coal.getName());
+                    }
+                    GenericMethods.sleep(1000);
+                }
+            } else
+                System.out.println("Magic box NOT found");
+
+            // print portal and police probability
+            System.out.println("\nDirection - Exit Probability (%), Police Encounterment Probability (%)");
             System.out.println(
                     "North - " + Portal.nPortal.getExitProbability() + ", " + Portal.nPortal.getPoliceProbability());
             System.out.println(
@@ -116,82 +178,16 @@ public class Game {
     }
 
     public static void encounterPolice() {
+        GenericMethods.sleep(1000);
         System.out.println("You have " + player.cloakCount + " invisibility cloaks");
-        if (player.cloakCount > 0) {
-            Scanner scanner = new Scanner(System.in);
-            String choice;
-            boolean valid = false;
-            while (valid == false) {
-                System.out.println("Do you wish to use an invisibility cloak? (y/n)");
-                choice = scanner.nextLine().trim().toLowerCase();
-                switch (choice) {
-                    case "y":
-                        System.out.println("You used an invisibility cloak");
-                        valid = !valid;
-                        break;
-                    case "n":
-                        System.out.println("You didn't use the invisibility cloak");
-                        valid = !valid;
-                        break;
-                    default:
-                        System.out.println("Please answer y or n only");
-                }
-            }
-        } else {
-            System.out.println("You didn't have any invisibility cloak");
-            double price = coins * Items.getBribeMultiplier();
-            System.out.println("The coins you have to pay to bribe the police is " + price);
-            System.out.println("You have " + coins + " coins");
-            GenericMethods.sleep(1000);
-            if ((double) coins >= price) {
-                Scanner scanner = new Scanner(System.in);
-                String choice;
-                boolean valid = false;
-                while (valid == false) {
-                    System.out.println("Do you wish to bribe the police? (y/n)");
-                    choice = scanner.nextLine().trim().toLowerCase();
-                    switch (choice) {
-                        case "y":
-                            System.out.println("You bribed the police");
-                            valid = !valid;
-                            break;
-                        case "n":
-                            System.out.println("You didn't bribe the police");
-                            valid = !valid;
-                            break;
-                        default:
-                            System.out.println("Please answer y or n only");
-                    }
-                }
-            } else {
-                System.out.println("You didn't have enough coins");
-                System.out.println("You have " + player.jumpbackCount + " jump backwards");
-                if (player.jumpbackCount > 0) {
-                    Scanner scanner = new Scanner(System.in);
-                    String choice;
-                    boolean valid = false;
-                    while (valid == false) {
-                        System.out.println("Do you wish to use a jump back? (y/n)");
-                        System.out.println("Warning: if you decide not to use a jump back, you will loss immediately");
-                        choice = scanner.nextLine().trim().toLowerCase();
-                        switch (choice) {
-                            case "y":
-                                System.out.println("You used a jump back");
-                                valid = !valid;
-                                break;
-                            case "n":
-                                System.out
-                                        .println("You ended up in jail without using a jump back, the game has ended");
-                                valid = !valid;
-                                break;
-                            default:
-                                System.out.println("Please answer y or n only");
-                        }
-                    }
-                } else {
-                    System.out.println("You ended up in jail with no jump back, the game has ended");
-                }
-            }
+        System.out.println("You have " + player.getCoins() + " coins");
+        System.out.println("You have " + player.jumpbackCount + " jump backwards\n");
+        if (Items.InvisibilityCloak.useCloak(player)) {
+            return;
+        } else if (Items.useBribe(player)) {
+            return;
+        } else if (Items.useJumpback(player)) {
+            return;
         }
     }
 }

@@ -4,25 +4,26 @@ import java.util.Random;
 public abstract class Items {
 
     protected String name;
-    protected int chanceOfOccurring;
+    protected int probability;
     protected String description;
-    static Items.Coins coins = new Items.Coins("Coins", 30, 10);
-    static Items.MagicPoliceAlarm alarm = new Items.MagicPoliceAlarm("Magic Police Alarm", 25, 3);
-    static Items.InvisibilityCloak cloak = new Items.InvisibilityCloak("Invisibility Cloak", 15, 1);
-    static Items.Coal coal = new Items.Coal("Coal", 30);
-    static Player player = new Player(Game.playerName, 10, 3, 3);
+    // static Items.Coins coins = new Items.Coins("Coins", 30, 10);
+    // static Items.MagicPoliceAlarm alarm = new Items.MagicPoliceAlarm("Magic
+    // Police Alarm", 25, 3);
+    // static Items.InvisibilityCloak cloak = new
+    // Items.InvisibilityCloak("Invisibility Cloak", 15, 1);
+    // static Items.Coal coal = new Items.Coal("Coal", 30);
 
-    public Items(String name, int chanceOfOccurring) {
+    public Items(String name, int probability) {
         this.name = name;
-        this.chanceOfOccurring = chanceOfOccurring;
+        this.probability = probability;
     }
 
     public static class Coins extends Items {
 
         private int value;
 
-        public Coins(String name, int chanceOfOccurring, int value) {
-            super(name, chanceOfOccurring);
+        public Coins(String name, int probability, int value) {
+            super(name, probability);
             this.value = value;
         }
 
@@ -30,18 +31,18 @@ public abstract class Items {
             return this.value;
         }
 
-        public static void activateCoinsItem() {
+        public static void activateCoinsItem(Player player) {
             Random rand = new Random();
-            int randomNum = rand.nextInt(26) + 10;
-            System.out.println("You get " + randomNum + " coins");
-            player.setCoins(randomNum + player.getCoins());
+            int newCoins = rand.nextInt(26) + 10;
+            System.out.println("You get " + newCoins + " coins");
+            player.setCoins(newCoins + player.getCoins());
             System.out.println("You now have " + player.getCoins() + " coins");
         }
     }
 
     public static class MagicPoliceAlarm extends Items {
-        public MagicPoliceAlarm(String name, int chanceOfOccurring, int raisedPercentage) {
-            super(name, chanceOfOccurring);
+        public MagicPoliceAlarm(String name, int probability, int raisedPercentage) {
+            super(name, probability);
         }
 
         public static void activateAlarmItem() {
@@ -54,21 +55,41 @@ public abstract class Items {
 
     public static class InvisibilityCloak extends Items {
 
-        private int space = 1;
-
-        public InvisibilityCloak(String name, int chanceOfOccurring, int space) {
-            super(name, chanceOfOccurring);
-            this.space = space;
+        public InvisibilityCloak(String name, int probability) {
+            super(name, probability);
         }
 
-        public int getSpace() {
-            return this.space;
+        public static boolean useCloak(Player player) {
+            if (player.cloakCount > 0) {
+                Scanner scanner = new Scanner(System.in);
+                String choice;
+                while (true) {
+                    System.out.println("Do you wish to use an invisibility cloak? (y/n)");
+                    choice = scanner.nextLine().trim().toLowerCase();
+                    switch (choice) {
+                        case "y":
+                            System.out.println("You used an invisibility cloak");
+                            player.cloakCount--;
+                            player.inventorySpace++;
+                            System.out.println("You have " + player.cloakCount + " invisibility cloak left");
+                            return true;
+                        case "n":
+                            System.out.println("You didn't use the invisibility cloak");
+                            return false;
+                        default:
+                            System.out.println("Please answer y or n only");
+                    }
+                }
+            }
+            System.out.println("You don't have any invisibility cloaks\n");
+            return false;
         }
     }
 
     public static class Coal extends Items {
-        public Coal(String name, int chanceOfOccurring) {
-            super(name, chanceOfOccurring);
+
+        public Coal(String name, int probability) {
+            super(name, probability);
         }
     }
 
@@ -76,69 +97,113 @@ public abstract class Items {
         return this.name;
     }
 
-    public int getChanceOfOccurring() {
-        return this.chanceOfOccurring;
+    public int getprobability() {
+        return this.probability;
     }
 
-    public static void randomizeMagicBox() {
-        if (GenericMethods.randomizeOneToHundred() <= 50) {
-            System.out.println("Magic box found!");
-            Scanner scanner = new Scanner(System.in);
-            String choice;
-            boolean valid = false;
-            while (valid == false) {
-                System.out.println("Open the box? (y/n)");
-                choice = scanner.nextLine().trim().toLowerCase();
-                switch (choice) {
-                    case "y":
-                        System.out.println("You opened the box");
-                        GenericMethods.sleep(1000);
-                        randomizeMagicBoxItems();
-                        valid = !valid;
-                        break;
-                    case "n":
-                        System.out.println("You didn't open the box");
-                        valid = !valid;
-                        break;
-                    default:
-                        System.out.println("Please answer y or n only");
-                }
+    public static boolean foundMagicBox() {
+        System.out.println("Magic box found!");
+        Scanner scanner = new Scanner(System.in);
+        String choice;
+        while (true) {
+            System.out.println("Open the box? (y/n)");
+            choice = scanner.nextLine().trim().toLowerCase();
+            switch (choice) {
+                case "y":
+                    System.out.println("You opened the box");
+                    GenericMethods.sleep(1000);
+                    return true;
+                case "n":
+                    System.out.println("You didn't open the box");
+                    return false;
+                default:
+                    System.out.println("Please answer y or n only");
             }
-        } else
-            System.out.println("Magic box NOT found");
+        }
     }
 
     // -------------------------Magic box methods below-----------------------------
 
-    public static void randomizeMagicBoxItems() {
-        int coinsChance = coins.getChanceOfOccurring();
-        int alarmChance = alarm.getChanceOfOccurring();
-        int cloakChance = cloak.getChanceOfOccurring();
-        int randomNum = GenericMethods.randomizeOneToHundred();
-        System.out.println("You recieved...");
-        GenericMethods.sleep(500);
-        if (randomNum <= coinsChance) {
-            // coins, 30%
-            System.out.println(coins.getName());
-            Coins.activateCoinsItem();
-        } else if (randomNum <= coinsChance + alarmChance) {
-            // alarm, 25%
-            System.out.println(alarm.getName());
-            MagicPoliceAlarm.activateAlarmItem();
-        } else if (randomNum <= coinsChance + alarmChance + cloakChance) {
-            // cloak, 15%
-            System.out.println(cloak.getName());
-        } else {
-            // coal, 30%
-            System.out.println(coal.getName());
-        }
-    }
+    // public static void randomizeMagicBoxItems() {
+    // int coinsChance = coins.getprobability();
+    // int alarmChance = alarm.getprobability();
+    // int cloakChance = cloak.getprobability();
+    // int randomNum = GenericMethods.randomizeOneToHundred();
+    // System.out.println("You recieved...");
+    // GenericMethods.sleep(500);
+    // if (randomNum <= 100) {
+    // // coins, 30%
+    // System.out.println(coins.getName());
+    // Coins.activateCoinsItem(player);
+    // } else if (randomNum <= coinsChance + alarmChance) {
+    // // alarm, 25%
+    // System.out.println(alarm.getName());
+    // MagicPoliceAlarm.activateAlarmItem();
+    // } else if (randomNum <= coinsChance + alarmChance + cloakChance) {
+    // // cloak, 15%
+    // System.out.println(cloak.getName());
+    // } else {
+    // // coal, 30%
+    // System.out.println(coal.getName());
+    // }
+    // }
+
+    // -------------------------Other actions methods below-----------------------------
 
     public static double getBribeMultiplier() {
         Random rand = new Random();
         int randomNum = rand.nextInt(11) + 5;
         double multiplier = (double) randomNum;
-        multiplier = multiplier/10;
+        multiplier = multiplier / 10;
         return multiplier;
     }
+
+    public static boolean useBribe(Player player) {
+        int price = (int) Math.floor(player.getCoins() * Items.getBribeMultiplier());
+        System.out.println("The coins you have to pay to bribe the police is " + price);
+        if (player.getCoins() >= price && player.getCoins() != 0) {
+            Scanner scanner = new Scanner(System.in);
+            String choice;
+            while (true) {
+                System.out.println("Do you wish to bribe the police? (y/n)");
+                choice = scanner.nextLine().trim().toLowerCase();
+                switch (choice) {
+                    case "y":
+                        System.out.println("You bribed the police");
+                        player.setCoins(player.getCoins() - price);
+                        System.out.println("You have " + player.getCoins() + " coins left");
+                        return true;
+                    case "n":
+                        System.out.println("You didn't bribe the police");
+                        System.out.println("You get caught\n");
+                        return false;
+                    default:
+                        System.out.println("Please answer y or n only");
+                }
+            }
+        }
+        if (player.getCoins() == 0) {
+            System.out.println("You have no coins");
+            System.out.println("You are caught\n");
+        } else {
+            System.out.println("You don't have enough coins to bribe");
+            System.out.println("You are caught\n");
+        }
+        return false;
+    }
+
+    public static boolean useJumpback(Player player) {
+        if (player.jumpbackCount > 0) {
+            System.out.println("You land in jail, a jump back is used automatically\n");
+            player.jumpbackCount--;
+            System.out.println("You have " + player.jumpbackCount + " jump backs left");
+            GenericMethods.sleep(2000);
+            return true;
+        } else {
+            System.out.println("You are in jail and don't have any jump backs left, the game has ended");
+            GenericMethods.endGame(false);
+            return false;
+        }
+    }
+    
 }
